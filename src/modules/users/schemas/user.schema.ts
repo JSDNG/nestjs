@@ -13,7 +13,7 @@ export class User {
 
   @Prop()
   @Field()
-  name: string;
+  username: string;
 
   @Prop()
   @Field()

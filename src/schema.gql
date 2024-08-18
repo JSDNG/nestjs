@@ -4,7 +4,7 @@
 
 type User {
   _id: ID!
-  name: String!
+  username: String!
   email: String!
 }
 
@@ -21,8 +21,9 @@ type Mutation {
 }
 
 input CreateUserInput {
-  name: String!
-  email: String!
+  username: String
+  email: String
+  phone: String
 }
 
 input CreateUsersInput {
@@ -30,7 +31,8 @@ input CreateUsersInput {
 }
 
 input UpdateUserInput {
-  name: String!
-  email: String!
+  username: String!
+  email: String
+  phone: String
   id: String!
 }

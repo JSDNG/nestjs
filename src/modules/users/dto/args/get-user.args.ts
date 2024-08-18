@@ -8,7 +8,7 @@ export class GetUserArgs {
 
   @Field()
   @IsNotEmpty()
-  name: string;
+  username: string;
   
   @Field()
   @IsNotEmpty()

@@ -23,12 +23,16 @@ export class UsersService {
     const user = new this.userModel({
       ...createUserInput,
     });
-    return user.save();
+    return await user.save();
   }
 
   async createUsers(
     createUsersInput: CreateUsersInput,
   ): Promise<UserDocument[]> {
+    if (!createUsersInput || !createUsersInput.users) {
+      throw new Error('Invalid input: users is undefined');
+    }
+
     const users = createUsersInput.users.map((userInput) => ({
       ...userInput,
     }));
@@ -38,8 +42,12 @@ export class UsersService {
     return result;
   }
 
-  async findAll(): Promise<UserDocument[]> {
-    return this.userModel.find().exec(); // Giữ nguyên
+  async findAll(): Promise<User[]> {
+    const users = await this.userModel.find().exec();
+    return users.map(user => ({
+      ...user.toObject(),
+      _id: user._id.toString(), // Convert ObjectId to string
+    }));
   }
 
   async findOne(id: string): Promise<UserDocument> {
@@ -48,6 +56,10 @@ export class UsersService {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
     return user;
+  }
+
+  async findByEmail(email: string) {
+    return await this.userModel.findOne({ email });
   }
 
   async update(updateUserInput: UpdateUserInput): Promise<UserDocument> {
@@ -59,7 +71,7 @@ export class UsersService {
         `User with ID ${updateUserInput.id} not found`,
       );
     }
-    user.name = updateUserInput.name;
+    user.username = updateUserInput.username;
     return user.save();
   }
 
