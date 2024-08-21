@@ -1,15 +1,27 @@
 services:
-  mongodb:
-    image: mongo:5.0.15
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: 123456
+  #   mongodb:
+  #     image: mongo:5.0.15
+  #     environment:
+  #       MONGO_INITDB_ROOT_USERNAME: root
+  #       MONGO_INITDB_ROOT_PASSWORD: 123456
+  #     ports:
+  #       - 27017:27017
+  #     volumes:
+  #       - mongodb_data_container:/data/db
+
+  # volumes:
+  #   mongodb_data_container:
+  mysql:
+    image: mysql:8.0
+    restart: always
     ports:
-      - 27017:27017
+      - '3307:3306'
+    environment:
+      - MYSQL_DATABASE=mysql
+      - MYSQL_ROOT_PASSWORD=123456
     volumes:
-      - mongodb_data_container:/data/db
-
+      - db:/var/lib/mysql
 volumes:
-  mongodb_data_container:
+  db:
 
-    # docker compose -p nestjs-mongodb up -d
+  # docker compose -p nestjs-mongodb up -d

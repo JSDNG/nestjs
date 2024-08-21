@@ -3,27 +3,26 @@
 # ------------------------------------------------------
 
 type User {
-  _id: ID!
+  id: Int!
   username: String!
   email: String!
 }
 
 type Query {
   users: [User!]!
-  user(id: String!): User!
+  user(id: Float!): User!
 }
 
 type Mutation {
   createUser(createUserInput: CreateUserInput!): User!
   createUsers(createUsersInput: CreateUsersInput!): [User!]!
   updateUser(updateUserInput: UpdateUserInput!): User!
-  deleteUser(id: String!): String!
+  deleteUser(id: Float!): String!
 }
 
 input CreateUserInput {
   username: String
   email: String
-  phone: String
 }
 
 input CreateUsersInput {
@@ -33,6 +32,5 @@ input CreateUsersInput {
 input UpdateUserInput {
   username: String!
   email: String
-  phone: String
-  id: String!
+  id: Float!
 }

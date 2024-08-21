@@ -5,9 +5,9 @@ import { InputType, Field, Int, PartialType } from '@nestjs/graphql';
 @InputType()
 export class UpdateUserInput extends PartialType(CreateUserInput) {
   @Field()
-  @IsMongoId()
+  //@IsMongoId()
   @IsNotEmpty()
-  id: string;
+  id: number;
 
   @Field()
   @IsNotEmpty()

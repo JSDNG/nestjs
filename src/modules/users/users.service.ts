@@ -1,34 +1,27 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { User, UserDocument } from './schemas/user.schema';
 import { Model, Types } from 'mongoose';
 import { CreateUserInput } from './dto/inputs/create-user.input';
 import { CreateUsersInput } from './dto/inputs/create-users.input';
 import { UpdateUserInput } from './dto/inputs/update-user.input';
 import { v4 as uuid } from 'uuid';
+import { PrismaService } from '@/prisma.service';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class UsersService {
-  constructor(
-    @InjectModel(User.name)
-    private userModel: Model<UserDocument>,
-  ) {}
+  constructor(private userPrisma: PrismaService) {}
 
-  isEmailExist = async (email: string) => {
-    const user = await this.userModel.exists({ email });
-    if (user) return true;
-    return false;
-  };
-  async create(createUserInput: CreateUserInput): Promise<UserDocument> {
-    const user = new this.userModel({
-      ...createUserInput,
-    });
-    return await user.save();
+  //   isEmailExist = async (email: string) => {
+  //     const user = await this.userPrisma.exists({ email });
+  //     if (user) return true;
+  //     return false;
+  //   };
+  async create(createUserInput: CreateUserInput): Promise<User> {
+    return await this.userPrisma.user.create({ data: createUserInput });
   }
 
-  async createUsers(
-    createUsersInput: CreateUsersInput,
-  ): Promise<UserDocument[]> {
+  async createUsers(createUsersInput: CreateUsersInput): Promise<User[]> {
     if (!createUsersInput || !createUsersInput.users) {
       throw new Error('Invalid input: users is undefined');
     }
@@ -37,21 +30,23 @@ export class UsersService {
       ...userInput,
     }));
 
-    const result = await this.userModel.insertMany(users);
+    // Execute createMany and get the count of created users
+    const result = await this.userPrisma.user.createMany({ data: users });
+    if (result.count > 0) {
+      // Fetch and return the created users
+      const createdUsers = await this.userPrisma.user.findMany();
+      return createdUsers;
+    }
 
-    return result;
+    return [];
   }
 
   async findAll(): Promise<User[]> {
-    const users = await this.userModel.find().exec();
-    return users.map(user => ({
-      ...user.toObject(),
-      _id: user._id.toString(), // Convert ObjectId to string
-    }));
+    return await this.userPrisma.user.findMany();
   }
 
-  async findOne(id: string): Promise<UserDocument> {
-    const user = await this.userModel.findOne({ _id: id });
+  async findOne(id: number): Promise<User> {
+    const user = await this.userPrisma.user.findUnique({ where: { id } });
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
@@ -59,30 +54,37 @@ export class UsersService {
   }
 
   async findByEmail(email: string) {
-    return await this.userModel.findOne({ email });
+    return await this.userPrisma.user.findUnique({ where: { email } });
   }
 
-  async update(updateUserInput: UpdateUserInput): Promise<UserDocument> {
-    const user = await this.userModel
-      .findById(new Types.ObjectId(updateUserInput.id))
-      .exec();
-    if (!user) {
-      throw new NotFoundException(
-        `User with ID ${updateUserInput.id} not found`,
-      );
-    }
-    user.username = updateUserInput.username;
-    return user.save();
-  }
-
-  async remove(id: string): Promise<string> {
-    const result = await this.userModel.deleteOne({
-      _id: new Types.ObjectId(id),
+  async update(updateUserInput: UpdateUserInput): Promise<User> {
+    const user = await this.userPrisma.user.findFirst({
+      where: { id: updateUserInput.id },
     });
-    if (result.deletedCount > 0) {
+    if (!user) {
+      throw new NotFoundException('User not found!');
+    }
+    return await this.userPrisma.user.update({
+      where: {
+        id: updateUserInput.id,
+      },
+      data: updateUserInput,
+    });
+  }
+
+  async remove(id: number): Promise<string> {
+    const user = await this.userPrisma.user.findFirst({
+      where: { id },
+    });
+    if (!user) {
+      throw new NotFoundException('User not found!');
+    }
+    try {
+      await this.userPrisma.user.delete({ where: { id } });
       return `User with ID ${id} has been successfully deleted.`;
-    } else {
-      return `User with ID ${id} could not be found.`;
+    } catch (error) {
+      console.log(error);
+      return 'Error form server';
     }
   }
 }

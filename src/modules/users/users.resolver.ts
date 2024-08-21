@@ -23,22 +23,24 @@ export class UsersResolver {
 
   @Query(() => [User], { name: 'users' })
   async findAll(): Promise<User[]> {
-    return this.usersService.findAll();
+    return await this.usersService.findAll();
   }
 
   @Query(() => User, { name: 'user' })
-  async findOne(@Args('id', { type: () => String }) id: string) {
+  async findOne(@Args('id', { type: () => Number }) id: number): Promise<User> {
     return this.usersService.findOne(id);
   }
 
   @Mutation(() => User, { name: 'updateUser' })
-  async updateUser(@Args('updateUserInput') updateUserInput: UpdateUserInput) {
+  async updateUser(
+    @Args('updateUserInput') updateUserInput: UpdateUserInput,
+  ): Promise<User> {
     return this.usersService.update(updateUserInput);
   }
 
   @Mutation(() => String, { name: 'deleteUser' })
   async removeUser(
-    @Args('id', { type: () => String }) id: string,
+    @Args('id', { type: () => Number }) id: number,
   ): Promise<string> {
     return this.usersService.remove(id);
   }

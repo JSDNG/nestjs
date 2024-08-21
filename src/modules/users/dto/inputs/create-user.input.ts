@@ -23,15 +23,15 @@ export class CreateUserInput {
   //   @MinLength(6)
   //   password: string;
 
-  @Field(() => String, { nullable: true })
-  @IsOptional()
-  @Matches(
-    /^(\+?\d{1,4}[\s-])?(?:\(?\d{1,5}\)?[\s-]?)\d{1,4}[\s-]?\d{1,4}[\s-]?\d{1,9}$/,
-    {
-      message: 'Số điện thoại không hợp lệ!',
-    },
-  )
-  phone?: string;
+  //   @Field(() => String, { nullable: true })
+  //   @IsOptional()
+  //   @Matches(
+  //     /^(\+?\d{1,4}[\s-])?(?:\(?\d{1,5}\)?[\s-]?)\d{1,4}[\s-]?\d{1,4}[\s-]?\d{1,9}$/,
+  //     {
+  //       message: 'Số điện thoại không hợp lệ!',
+  //     },
+  //   )
+  //   phone?: string;
 }
 
 @InputType()
