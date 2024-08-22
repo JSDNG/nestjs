@@ -6,11 +6,33 @@ type User {
   id: Int!
   username: String!
   email: String!
+  password: String!
+  phone: String
+  refreshToken: String
+}
+
+type UserPagination {
+  data: [User!]!
+  total: Float!
+  limit: Float!
+  page: Float!
+}
+
+type LoginResult {
+  data: User!
+  accessToken: String!
+  refreshToken: String!
 }
 
 type Query {
-  users: [User!]!
+  users(filter: UserFilter!): UserPagination!
   user(id: Float!): User!
+}
+
+input UserFilter {
+  search: String
+  limit: Int
+  page: Int
 }
 
 type Mutation {
@@ -18,11 +40,16 @@ type Mutation {
   createUsers(createUsersInput: CreateUsersInput!): [User!]!
   updateUser(updateUserInput: UpdateUserInput!): User!
   deleteUser(id: Float!): String!
+  register(data: RegisterAuthInput!): User!
+  login(data: LoginAuthInput!): LoginResult!
 }
 
 input CreateUserInput {
   username: String
   email: String
+  password: String!
+  phone: String
+  refreshToken: String
 }
 
 input CreateUsersInput {
@@ -32,5 +59,20 @@ input CreateUsersInput {
 input UpdateUserInput {
   username: String!
   email: String
+  password: String
+  phone: String
+  refreshToken: String
   id: Float!
+}
+
+input RegisterAuthInput {
+  username: String
+  email: String
+  password: String!
+  phone: String
+}
+
+input LoginAuthInput {
+  email: String
+  password: String!
 }

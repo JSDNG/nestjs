@@ -1,10 +1,5 @@
 import { RESPONSE_MESSAGE } from '@/decorator/customize';
-import {
-  Injectable,
-  NestInterceptor,
-  ExecutionContext,
-  CallHandler,
-} from '@nestjs/common';
+import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -26,12 +21,11 @@ export class TransformInterceptor<T>
     next: CallHandler,
   ): Observable<Response<T>> {
     return next.handle().pipe(
-      map((data) => ({
+      map((data: T) => ({
         statusCode: context.switchToHttp().getResponse().statusCode,
         message:
-          this.reflector.get<string>(RESPONSE_MESSAGE, context.getHandler()) ||
-          '',
-        data: data,
+          this.reflector.get<string>(RESPONSE_MESSAGE, context.getHandler()) || '',
+        data: data, // Giữ nguyên kiểu dữ liệu của `data`
       })),
     );
   }

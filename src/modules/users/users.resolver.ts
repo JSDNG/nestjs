@@ -1,7 +1,7 @@
 import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
 import { UsersService } from './users.service';
-import { User } from './schemas/user.schema';
-import { CreateUserInput } from './dto/inputs/create-user.input';
+import { User, UserPagination } from './schemas/user.schema';
+import { CreateUserInput, UserFilter } from './dto/inputs/create-user.input';
 import { CreateUsersInput } from './dto/inputs/create-users.input';
 import { UpdateUserInput } from './dto/inputs/update-user.input';
 
@@ -21,9 +21,10 @@ export class UsersResolver {
     return this.usersService.createUsers(createUsersInput);
   }
 
-  @Query(() => [User], { name: 'users' })
-  async findAll(): Promise<User[]> {
-    return await this.usersService.findAll();
+  @Query(() => UserPagination, { name: 'users' })
+  async findAll(@Args('filter') filter: UserFilter): Promise<UserPagination> {
+    // debugger;
+    return await this.usersService.findAll(filter);
   }
 
   @Query(() => User, { name: 'user' })

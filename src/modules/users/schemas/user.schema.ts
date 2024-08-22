@@ -1,24 +1,38 @@
-import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { v4 as uuid } from 'uuid';
 
-//export type UserDocument = HydratedDocument<User>;
-
-//@Schema({ timestamps: true })
 @ObjectType()
 export class User {
   @Field(() => Int)
   id: number;
 
-  @Prop()
   @Field()
   username: string;
 
-  @Prop()
   @Field()
   email: string;
-  // Thêm các trường khác nếu cần
+
+  @Field()
+  password: string;
+
+  @Field({ nullable: true })
+  phone?: string;
+
+  @Field({ nullable: true })
+  refreshToken: string;
 }
 
-//export const UserSchema = SchemaFactory.createForClass(User);
+@ObjectType()
+export class UserPagination {
+  @Field(() => [User])
+  data: User[];
+
+  @Field()
+  total: number;
+
+  @Field()
+  limit: number;
+
+  @Field()
+  page: number;
+}

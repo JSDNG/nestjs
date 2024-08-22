@@ -8,7 +8,7 @@ import {
 } from 'class-validator';
 
 @InputType()
-export class CreateUserInput {
+export class RegisterAuthInput {
   @Field(() => String, { nullable: true })
   @IsNotEmpty({ message: 'Tên không được để trống' })
   username: string;
@@ -32,20 +32,17 @@ export class CreateUserInput {
     },
   )
   phone?: string;
-
-  @Field(() => String, { nullable: true })
-  @IsOptional()
-  refreshToken?: string;
 }
 
 @InputType()
-export class UserFilter {
+export class LoginAuthInput {
   @Field(() => String, { nullable: true })
-  search?: string;
+  @IsNotEmpty({ message: 'Email không được để trống' })
+  @IsEmail({}, { message: 'Email không hợp lệ!' })
+  email: string;
 
-  @Field(() => Int, { nullable: true })
-  limit?: number;
-
-  @Field(() => Int, { nullable: true })
-  page?: number;
+  @Field(() => String)
+  @IsNotEmpty({ message: 'Password không được để trống' })
+  @MinLength(6)
+  password: string;
 }
