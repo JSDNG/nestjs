@@ -92,10 +92,6 @@ export class UsersService {
     return user;
   }
 
-  async findByEmail(email: string) {
-    return await this.prismaService.user.findUnique({ where: { email } });
-  }
-
   async update(updateUserInput: UpdateUserInput): Promise<User> {
     const user = await this.prismaService.user.findFirst({
       where: { id: updateUserInput.id },

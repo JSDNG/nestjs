@@ -73,6 +73,6 @@ input RegisterAuthInput {
 }
 
 input LoginAuthInput {
-  email: String
+  email: String!
   password: String!
 }

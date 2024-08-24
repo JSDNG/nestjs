@@ -5,8 +5,7 @@ import { UsersModule } from '@/modules/users/users.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import { APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
-//import { AuthModule } from '@/auth/auth.module';
+import { APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { TransformInterceptor } from './core/transform.interceptor';
 import { AuthModule } from './auth/auth.module';
 
@@ -20,7 +19,6 @@ import { AuthModule } from './auth/auth.module';
     }),
     UsersModule,
     AuthModule,
-    //AuthModule,
   ],
   controllers: [AppController],
   providers: [
@@ -29,10 +27,6 @@ import { AuthModule } from './auth/auth.module';
       provide: APP_PIPE,
       useClass: ValidationPipe,
     },
-    // {
-    //   provide: APP_GUARD,
-    //   useClass: JwtAuthGuard,
-    // },
     // {
     //   provide: APP_INTERCEPTOR,
     //   useClass: TransformInterceptor,

@@ -4,7 +4,11 @@ import { User, UserPagination } from './schemas/user.schema';
 import { CreateUserInput, UserFilter } from './dto/inputs/create-user.input';
 import { CreateUsersInput } from './dto/inputs/create-users.input';
 import { UpdateUserInput } from './dto/inputs/update-user.input';
+import { UseGuards } from '@nestjs/common';
+import { AuthGuard } from '@/auth/auth.guard';
+import { CurrentUser } from '@/auth/auth.decorator';
 
+@UseGuards(AuthGuard)
 @Resolver(() => User)
 export class UsersResolver {
   constructor(private readonly usersService: UsersService) {}
@@ -22,8 +26,12 @@ export class UsersResolver {
   }
 
   @Query(() => UserPagination, { name: 'users' })
-  async findAll(@Args('filter') filter: UserFilter): Promise<UserPagination> {
+  async findAll(
+    @CurrentUser() user: User,
+    @Args('filter') filter: UserFilter,
+  ): Promise<UserPagination> {
     // debugger;
+    console.log(user);
     return await this.usersService.findAll(filter);
   }
 

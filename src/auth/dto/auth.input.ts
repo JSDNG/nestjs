@@ -36,7 +36,7 @@ export class RegisterAuthInput {
 
 @InputType()
 export class LoginAuthInput {
-  @Field(() => String, { nullable: true })
+  @Field(() => String)
   @IsNotEmpty({ message: 'Email không được để trống' })
   @IsEmail({}, { message: 'Email không hợp lệ!' })
   email: string;
