@@ -1,5 +1,4 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql';
-import { v4 as uuid } from 'uuid';
 
 @ObjectType()
 export class User {
@@ -18,7 +17,16 @@ export class User {
   @Field({ nullable: true })
   phone?: string;
 
-  @Field({ nullable: true })
+  @Field()
+  isActive: boolean;
+
+  @Field()
+  codeId: string;
+
+  @Field()
+  codeExpired: Date;
+
+  @Field()
   refreshToken: string;
 }
 

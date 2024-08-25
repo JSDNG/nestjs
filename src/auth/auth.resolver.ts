@@ -3,10 +3,14 @@ import { AuthService } from './auth.service';
 import { LoginAuthInput, RegisterAuthInput } from './dto/auth.input';
 import { User } from '@/modules/users/schemas/user.schema';
 import { LoginResult } from './schemas/auth.schema';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Resolver()
 export class AuthResolver {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly mailerService: MailerService,
+  ) {}
 
   @Mutation(() => User, { name: 'register' })
   createAuth(@Args('data') data: RegisterAuthInput) {
@@ -14,9 +18,7 @@ export class AuthResolver {
   }
 
   @Mutation(() => LoginResult)
-  async login(
-    @Args('data') data: LoginAuthInput,
-  ): Promise<LoginResult> {
+  async login(@Args('data') data: LoginAuthInput): Promise<LoginResult> {
     return await this.authService.login(data);
   }
 }

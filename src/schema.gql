@@ -8,8 +8,16 @@ type User {
   email: String!
   password: String!
   phone: String
-  refreshToken: String
+  isActive: Boolean!
+  codeId: String!
+  codeExpired: DateTime!
+  refreshToken: String!
 }
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
 
 type UserPagination {
   data: [User!]!
@@ -36,24 +44,10 @@ input UserFilter {
 }
 
 type Mutation {
-  createUser(createUserInput: CreateUserInput!): User!
-  createUsers(createUsersInput: CreateUsersInput!): [User!]!
   updateUser(updateUserInput: UpdateUserInput!): User!
   deleteUser(id: Float!): String!
   register(data: RegisterAuthInput!): User!
   login(data: LoginAuthInput!): LoginResult!
-}
-
-input CreateUserInput {
-  username: String
-  email: String
-  password: String!
-  phone: String
-  refreshToken: String
-}
-
-input CreateUsersInput {
-  users: [CreateUserInput!]!
 }
 
 input UpdateUserInput {
@@ -61,6 +55,9 @@ input UpdateUserInput {
   email: String
   password: String
   phone: String
+  isActive: Boolean
+  codeId: String
+  codeExpired: DateTime
   refreshToken: String
   id: Float!
 }

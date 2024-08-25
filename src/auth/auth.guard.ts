@@ -22,7 +22,7 @@ export class AuthGuard implements CanActivate {
     const token = this.extractToken(ctx.getContext().req);
 
     if (!token) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException("Access Token không hợp lệ ");
     }
 
     try {

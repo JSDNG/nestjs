@@ -13,17 +13,17 @@ import { CurrentUser } from '@/auth/auth.decorator';
 export class UsersResolver {
   constructor(private readonly usersService: UsersService) {}
 
-  @Mutation(() => User, { name: 'createUser' })
-  async createUser(@Args('createUserInput') createUserInput: CreateUserInput) {
-    return this.usersService.create(createUserInput);
-  }
+//   @Mutation(() => User, { name: 'createUser' })
+//   async createUser(@Args('createUserInput') createUserInput: CreateUserInput) {
+//     return this.usersService.create(createUserInput);
+//   }
 
-  @Mutation(() => [User], { name: 'createUsers' })
-  async createUsers(
-    @Args('createUsersInput') createUsersInput: CreateUsersInput,
-  ): Promise<User[]> {
-    return this.usersService.createUsers(createUsersInput);
-  }
+//   @Mutation(() => [User], { name: 'createUsers' })
+//   async createUsers(
+//     @Args('createUsersInput') createUsersInput: CreateUsersInput,
+//   ): Promise<User[]> {
+//     return this.usersService.createUsers(createUsersInput);
+//   }
 
   @Query(() => UserPagination, { name: 'users' })
   async findAll(
@@ -31,7 +31,7 @@ export class UsersResolver {
     @Args('filter') filter: UserFilter,
   ): Promise<UserPagination> {
     // debugger;
-    console.log(user);
+    //console.log(user);
     return await this.usersService.findAll(filter);
   }
 

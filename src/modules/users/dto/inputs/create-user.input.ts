@@ -33,6 +33,15 @@ export class CreateUserInput {
   )
   phone?: string;
 
+  @Field()
+  isActive: boolean;
+
+  @Field()
+  codeId: string;
+
+  @Field()
+  codeExpired: Date;
+
   @Field(() => String, { nullable: true })
   @IsOptional()
   refreshToken?: string;

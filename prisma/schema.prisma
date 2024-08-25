@@ -13,6 +13,9 @@ model User {
   username    String?
   password    String
   phone       String?
+  isActive    Boolean
+  codeId      String
+  codeExpired   DateTime
   refreshToken String? @db.VarChar(255)
   @@map("users")
 }

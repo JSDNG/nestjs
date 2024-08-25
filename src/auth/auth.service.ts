@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -10,12 +11,17 @@ import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
 import { comparePasswordHelpers, hashPasswordHelpers } from '@/helpers/util';
 import { LoginResult } from './schemas/auth.schema';
+import { v4 as uuidv4 } from 'uuid';
+import dayjs from 'dayjs';
+import { Queue } from 'bullmq';
+import { InjectQueue } from '@nestjs/bullmq';
 
 @Injectable()
 export class AuthService {
   constructor(
     private prismaService: PrismaService,
     private jwtService: JwtService,
+    @InjectQueue('mailQueue') private readonly mailQueue: Queue,
   ) {}
 
   isEmailExist = async (email: string) => {
@@ -29,17 +35,45 @@ export class AuthService {
     if (checkEmail) {
       //throw new NotFoundException(`User exist`);
       throw new HttpException(
-        { message: 'User exist}' },
+        { message: 'User exist' },
         HttpStatus.BAD_REQUEST,
       );
     }
 
     const hassPass = await hashPasswordHelpers(userData.password);
-
-    const result = await this.prismaService.user.create({
-      data: { ...userData, password: hassPass },
+    const codeId = uuidv4();
+    const user = await this.prismaService.user.create({
+      data: {
+        ...userData,
+        password: hassPass,
+        isActive: false,
+        codeId: codeId,
+        codeExpired: dayjs().add(5, 'minutes').toDate(),
+      },
     });
-    return result;
+    // try {
+    //   await this.mailerService.sendMail({
+    //     to: user.email, // list of receivers
+    //     //from: 'noreply@nestjs.com', // sender address
+    //     subject: 'Activate your account at @nestjs ✔', // Subject line
+    //     template: 'register.hbs',
+    //     context: {
+    //       name: user?.username ?? user?.email,
+    //       activationCode: codeId,
+    //     },
+    //   });
+    // } catch (error) {
+    //   console.error('Error sending mail:', error);
+    //   throw new Error('Failed to send email');
+    // }
+
+    // Add job to queue
+    await this.mailQueue.add('sendEmail', {
+      name: user?.username,
+      email: user?.email,
+      activationCode: codeId,
+    });
+    return user;
   }
 
   async login(userData: LoginAuthInput): Promise<LoginResult> {
@@ -68,6 +102,9 @@ export class AuthService {
       );
     }
 
+    if (user.isActive === false) {
+      throw new BadRequestException('Tài khoản chưa được kích hoạt.');
+    }
     const payload = {
       id: user.id,
       name: user.username,
