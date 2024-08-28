@@ -51,28 +51,18 @@ export class AuthService {
         codeExpired: dayjs().add(5, 'minutes').toDate(),
       },
     });
-    // try {
-    //   await this.mailerService.sendMail({
-    //     to: user.email, // list of receivers
-    //     //from: 'noreply@nestjs.com', // sender address
-    //     subject: 'Activate your account at @nestjs ✔', // Subject line
-    //     template: 'register.hbs',
-    //     context: {
-    //       name: user?.username ?? user?.email,
-    //       activationCode: codeId,
-    //     },
-    //   });
-    // } catch (error) {
-    //   console.error('Error sending mail:', error);
-    //   throw new Error('Failed to send email');
-    // }
 
     // Add job to queue
-    await this.mailQueue.add('sendEmail', {
-      name: user?.username,
-      email: user?.email,
-      activationCode: codeId,
-    });
+    await this.mailQueue.add(
+      'sendEmail',
+      {
+        name: user?.username,
+        email: user?.email,
+        activationCode: codeId,
+      },
+      { delay: 3 * 60 * 1000 }, // 3 minutes delayed
+    );
+
     return user;
   }
 

@@ -9,7 +9,7 @@ async function bootstrap() {
   const port = configService.get('PORT');
   app.setGlobalPrefix('api/v1', { exclude: [''] });
 
-  app.useGlobalPipes(new ValidationPipe({}));
+  app.useGlobalPipes(new ValidationPipe());
 
   //config cors
   app.enableCors({

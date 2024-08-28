@@ -5,14 +5,13 @@ import { UsersModule } from '@/modules/users/users.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import { APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
-import { TransformInterceptor } from './core/transform.interceptor';
+import { APP_PIPE } from '@nestjs/core';
 import { AuthModule } from '@/auth/auth.module';
 import { MailerModule } from '@nestjs-modules/mailer';
-import { BullModule } from '@nestjs/bullmq';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { MailerQueueService } from '@/mailer/mailer.service';
 import { MailProcessor } from '@/mailer/mail.processor';
+import { GraphQLError, GraphQLFormattedError } from 'graphql';
 
 @Module({
   imports: [
@@ -23,6 +22,19 @@ import { MailProcessor } from '@/mailer/mail.processor';
       driver: ApolloDriver,
       playground: true,
       autoSchemaFile: 'src/schema.gql',
+      formatError: (error: GraphQLError) => {
+        const originalError = error.extensions?.originalError;
+
+        const graphQLFormattedError = {
+          message:
+            (originalError as { message?: string })?.message || error.message,
+          code: (originalError as { code?: string })?.code || 'SERVER_ERROR',
+          statusCode:
+            (originalError as { statusCode?: number })?.statusCode || 500,
+        };
+
+        return graphQLFormattedError;
+      },
     }),
     MailerModule.forRootAsync({
       useFactory: async (configService: ConfigService) => ({
@@ -60,10 +72,6 @@ import { MailProcessor } from '@/mailer/mail.processor';
       provide: APP_PIPE,
       useClass: ValidationPipe,
     },
-    // {
-    //   provide: APP_INTERCEPTOR,
-    //   useClass: TransformInterceptor,
-    // },
   ],
 })
 export class AppModule {}

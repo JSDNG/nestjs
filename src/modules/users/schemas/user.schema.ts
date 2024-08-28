@@ -33,7 +33,7 @@ export class User {
 @ObjectType()
 export class UserPagination {
   @Field(() => [User])
-  data: User[];
+  users: User[];
 
   @Field()
   total: number;

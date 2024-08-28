@@ -11,8 +11,8 @@ import { JwtService } from '@nestjs/jwt';
         imports: [ConfigModule],
         useFactory: async (configService: ConfigService) => ({
           connection: {
-            host: configService.get('QUEUE_HOST'),
-            port: configService.get('QUEUE_PORT'),
+            host: configService.get('REDIS_HOST'),
+            port: configService.get('REDIS_PORT'),
           },
         }),
         inject: [ConfigService],

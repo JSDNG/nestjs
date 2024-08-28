@@ -3,13 +3,12 @@ import { AuthService } from './auth.service';
 import { LoginAuthInput, RegisterAuthInput } from './dto/auth.input';
 import { User } from '@/modules/users/schemas/user.schema';
 import { LoginResult } from './schemas/auth.schema';
-import { MailerService } from '@nestjs-modules/mailer';
 
 @Resolver()
 export class AuthResolver {
   constructor(
     private readonly authService: AuthService,
-    private readonly mailerService: MailerService,
+
   ) {}
 
   @Mutation(() => User, { name: 'register' })

@@ -16,40 +16,13 @@ export class UsersService {
     if (user) return true;
     return false;
   };
-//   async create(createUserInput: CreateUserInput): Promise<User> {
-//     let checkEmail = await this.isEmailExist(createUserInput.email);
-//     if (checkEmail) {
-//       throw new NotFoundException(`User exist`);
-//     }
-//     return await this.prismaService.user.create({ data: createUserInput });
-//   }
-
-//   async createUsers(createUsersInput: CreateUsersInput): Promise<User[]> {
-//     if (
-//       !createUsersInput ||
-//       !createUsersInput.users ||
-//       !Array.isArray(createUsersInput.users)
-//     ) {
-//       throw new Error('Invalid input: users is undefined or not an array');
-//     }
-
-//     // Kiểm tra xem các đối tượng trong mảng có đúng định dạng không
-//     const users = createUsersInput.users.map((userInput) => ({
-//       ...userInput,
-//     }));
-
-//     try {
-//       await this.prismaService.user.createMany({
-//         data: users,
-//       });
-//       const createdUsers = await this.prismaService.user.findMany();
-
-//       return createdUsers;
-//     } catch (error) {
-//       console.error('Error creating users:', error);
-//       throw new Error('Failed to create users');
-//     }
-//   }
+  async create(createUserInput: CreateUserInput): Promise<User> {
+    let checkEmail = await this.isEmailExist(createUserInput.email);
+    if (checkEmail) {
+      throw new NotFoundException(`User exist`);
+    }
+    return await this.prismaService.user.create({ data: createUserInput });
+  }
 
   async findAll(filter: UserFilter): Promise<UserPagination> {
     const search = filter.search || '';
@@ -77,7 +50,7 @@ export class UsersService {
     });
     const total = users.length;
     return {
-      data: users,
+      users,
       total,
       limit,
       page,
