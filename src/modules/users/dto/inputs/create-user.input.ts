@@ -45,6 +45,9 @@ export class CreateUserInput {
   @Field(() => String, { nullable: true })
   @IsOptional()
   refreshToken?: string;
+
+  @Field()
+  roleId: number;
 }
 
 @InputType()

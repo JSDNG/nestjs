@@ -8,15 +8,30 @@ datasource db {
 }
 
 model User {
-  id     Int   @default(autoincrement()) @id
-  email   String   @unique
-  username    String?
-  password    String
-  phone       String?
-  isActive    Boolean
-  codeId      String
+  id            Int      @default(autoincrement()) @id
+  email         String   @unique
+  username      String?
+  password      String
+  phone         String?
+  isActive      Boolean
+  codeId        String
   codeExpired   DateTime
-  refreshToken String? @db.VarChar(255)
+  refreshToken  String?  @db.VarChar(255)
+  roleId        Int
+  role          Role     @relation(fields: [roleId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  createdAt              DateTime            @default(now())
+  updatedAt              DateTime            @updatedAt
   @@map("users")
 }
+
+model Role {
+  id          Int     @default(autoincrement()) @id
+  roleName    String  @unique
+  users      User[] 
+  createdAt              DateTime            @default(now())
+  updatedAt              DateTime            @updatedAt
+  @@map("roles")
+}
+
+
 //npx prisma db push

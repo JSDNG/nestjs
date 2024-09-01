@@ -21,7 +21,6 @@ import { JwtService } from '@nestjs/jwt';
         name: 'mailQueue',
       }),
   ],
-  providers: [AuthService, PrismaService, JwtService],
-  exports: [BullModule], // Export BullModule nếu cần
+  exports: [BullModule], 
 })
 export class MailModule {}

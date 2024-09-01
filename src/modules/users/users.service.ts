@@ -1,11 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserInput, UserFilter } from './dto/inputs/create-user.input';
-import { CreateUsersInput } from './dto/inputs/create-users.input';
 import { UpdateUserInput } from './dto/inputs/update-user.input';
 import { v4 as uuid } from 'uuid';
 import { PrismaService } from '@/prisma.service';
 import { User } from '@prisma/client';
-import { UserPagination } from './schemas/user.schema';
+import { UserConnection, UserPagination } from './schemas/user.schema';
+import { IPaginatedType } from '@/pagination/paginated-type.interface';
 
 @Injectable()
 export class UsersService {
@@ -47,18 +47,45 @@ export class UsersService {
           },
         ],
       },
+      include: { role: true },
     });
     const total = users.length;
     return {
-      users,
+      data: users,
       total,
       limit,
       page,
     };
   }
 
+  async getUsersPagination({ offset, limit }: { offset?: number; limit?: number }): Promise<UserConnection> {
+    const users = await this.prismaService.user.findMany({
+      take: limit,
+      skip: offset,
+      include: { role: true },
+    });
+    const totalCount = await this.prismaService.user.count();
+    const edges = users.map((user) => ({
+      cursor: user.id,
+      node: user,
+    }));
+
+    return {
+      edges,
+      totalCount: users.length,
+      pageInfo: {
+        hasNextPage: offset + limit < totalCount,
+        hasPreviousPage: offset > 0,
+        startCursor: edges.length > 0 ? edges[0].cursor : null,
+        endCursor: edges.length > 0 ? edges[edges.length - 1].cursor : null,
+      },
+    };
+  }
   async findOne(id: number): Promise<User> {
-    const user = await this.prismaService.user.findUnique({ where: { id } });
+    const user = await this.prismaService.user.findUnique({
+      where: { id },
+      include: { role: true },
+    });
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
@@ -68,6 +95,7 @@ export class UsersService {
   async update(updateUserInput: UpdateUserInput): Promise<User> {
     const user = await this.prismaService.user.findFirst({
       where: { id: updateUserInput.id },
+      include: { role: true },
     });
     if (!user) {
       throw new NotFoundException('User not found!');

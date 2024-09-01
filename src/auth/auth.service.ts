@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -7,7 +8,6 @@ import {
 } from '@nestjs/common';
 import { LoginAuthInput, RegisterAuthInput } from './dto/auth.input';
 import { PrismaService } from '@/prisma.service';
-import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
 import { comparePasswordHelpers, hashPasswordHelpers } from '@/helpers/util';
 import { LoginResult } from './schemas/auth.schema';
@@ -15,12 +15,13 @@ import { v4 as uuidv4 } from 'uuid';
 import dayjs from 'dayjs';
 import { Queue } from 'bullmq';
 import { InjectQueue } from '@nestjs/bullmq';
+import { AuthGuard } from './auth.guard';
 
 @Injectable()
 export class AuthService {
   constructor(
     private prismaService: PrismaService,
-    private jwtService: JwtService,
+    private authGuard: AuthGuard,
     @InjectQueue('mailQueue') private readonly mailQueue: Queue,
   ) {}
 
@@ -33,11 +34,7 @@ export class AuthService {
   async register(userData: RegisterAuthInput): Promise<User> {
     let checkEmail = await this.isEmailExist(userData.email);
     if (checkEmail) {
-      //throw new NotFoundException(`User exist`);
-      throw new HttpException(
-        { message: 'User exist' },
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new ConflictException('Tài khoản đã tồn tại');
     }
 
     const hassPass = await hashPasswordHelpers(userData.password);
@@ -48,20 +45,21 @@ export class AuthService {
         password: hassPass,
         isActive: false,
         codeId: codeId,
+        roleId: 1,
         codeExpired: dayjs().add(5, 'minutes').toDate(),
       },
     });
 
     // Add job to queue
-    await this.mailQueue.add(
-      'sendEmail',
-      {
-        name: user?.username,
-        email: user?.email,
-        activationCode: codeId,
-      },
-      { delay: 3 * 60 * 1000 }, // 3 minutes delayed
-    );
+    // await this.mailQueue.add(
+    //   'sendEmail',
+    //   {
+    //     name: user?.username,
+    //     email: user?.email,
+    //     activationCode: codeId,
+    //   },
+    //   { delay: 1 * 60 * 1000 }, // 1 minutes delayed
+    // );
 
     return user;
   }
@@ -71,13 +69,11 @@ export class AuthService {
       where: {
         email: userData.email,
       },
+      include: { role: true },
     });
 
     if (!user) {
-      throw new HttpException(
-        { message: 'Account not found!' },
-        HttpStatus.UNAUTHORIZED,
-      );
+      throw new NotFoundException('Account not found!');
     }
 
     const verify = await comparePasswordHelpers(
@@ -86,30 +82,27 @@ export class AuthService {
     );
 
     if (!verify) {
-      throw new HttpException(
-        { message: 'Incorrect password!' },
-        HttpStatus.UNAUTHORIZED,
-      );
+      throw new BadRequestException('Dữ liệu đầu vào không hợp lệ');
     }
 
-    if (user.isActive === false) {
-      throw new BadRequestException('Tài khoản chưa được kích hoạt.');
-    }
+    // if (user.isActive === false) {
+    //   throw new BadRequestException('Tài khoản chưa được kích hoạt.');
+    // }
     const payload = {
       id: user.id,
       name: user.username,
       email: user.email,
     };
+    const accessToken = await this.authGuard.handleSignAsync(
+      payload,
+      process.env.JWT_ACCESS_TOKEN_EXPIRED,
+    );
 
-    const accessToken = await this.jwtService.signAsync(payload, {
-      secret: process.env.JWT_SECRET_KEY,
-      expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRED,
-    });
+    const refreshToken = await this.authGuard.handleSignAsync(
+      payload,
 
-    const refreshToken = await this.jwtService.signAsync(payload, {
-      secret: process.env.JWT_SECRET_KEY,
-      expiresIn: '7d',
-    });
+      '7d',
+    );
     await this.prismaService.user.update({
       where: {
         id: user.id,
@@ -124,5 +117,35 @@ export class AuthService {
       accessToken,
       refreshToken,
     };
+  }
+
+  async refreshToken(email: string): Promise<string> {
+    const user = await this.prismaService.user.findUnique({
+      where: {
+        email: email,
+      },
+    });
+    const payload = {
+      id: user.id,
+      name: user.username,
+      email: user.email,
+    };
+    const refreshToken = await this.authGuard.handleSignAsync(
+      payload,
+
+      '7d',
+    );
+    await this.prismaService.user.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        refreshToken: refreshToken,
+      },
+    });
+    return await this.authGuard.handleSignAsync(
+      payload,
+      process.env.JWT_ACCESS_TOKEN_EXPIRED,
+    );
   }
 }

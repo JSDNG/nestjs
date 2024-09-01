@@ -1,4 +1,5 @@
-import { Field, Int, ObjectType } from '@nestjs/graphql';
+import { Role } from '@/modules/roles/schemas/role.schema';
+import { createUnionType, Field, Int, ObjectType } from '@nestjs/graphql';
 
 @ObjectType()
 export class User {
@@ -28,12 +29,24 @@ export class User {
 
   @Field()
   refreshToken: string;
+
+  @Field()
+  roleId: number;
+
+  @Field()
+  createdAt: Date;
+
+  @Field()
+  updatedAt: Date;
+
+  @Field(() => Role)
+  role?: Role; // Định nghĩa mối quan hệ với Role
 }
 
 @ObjectType()
 export class UserPagination {
   @Field(() => [User])
-  users: User[];
+  data: User[];
 
   @Field()
   total: number;
@@ -44,3 +57,55 @@ export class UserPagination {
   @Field()
   page: number;
 }
+
+@ObjectType()
+export class UserEdge {
+  @Field(() => User)
+  node: User;
+
+  @Field()
+  cursor: number;
+}
+
+@ObjectType()
+export class PageInfo {
+  @Field()
+  hasNextPage: boolean;
+
+  @Field()
+  hasPreviousPage: boolean;
+
+  @Field({ nullable: true })
+  startCursor?: number;
+
+  @Field({ nullable: true })
+  endCursor?: number;
+}
+
+@ObjectType()
+export class UserConnection {
+  @Field(() => [UserEdge])
+  edges: UserEdge[];
+
+  @Field()
+  totalCount: number;
+
+  @Field(() => PageInfo)
+  pageInfo: PageInfo;
+}
+
+const ResultUnion = createUnionType({
+  name: 'ResultUnion',
+  types: () => [User, Role] as const,
+  resolveType(value) {
+    if ('username' in value) {
+      return 'User';
+    }
+    if ('roleName' in value) {
+      return 'Role';
+    }
+    return null;
+  },
+});
+
+export { ResultUnion };
