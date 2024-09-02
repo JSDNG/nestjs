@@ -1,19 +1,16 @@
 import { Resolver, Query, Mutation, Args, Subscription } from '@nestjs/graphql';
 import { UsersService } from './users.service';
-import {
-  ResultUnion,
-  User,
-  UserConnection,
-  UserPagination,
-} from './schemas/user.schema';
-import { CreateUserInput, UserFilter } from './dto/inputs/create-user.input';
+import { ResultUnion, User } from './schemas/user.schema';
+import { CreateUserInput } from './dto/inputs/create-user.input';
 import { UpdateUserInput } from './dto/inputs/update-user.input';
 import { CurrentUser } from '@/auth/auth.decorator';
 import { SkipAuthGuard } from '@/auth/skip-auth-guard.decorator';
-import { Paginated } from '@/pagination/paginated.decorator';
-import { IPaginatedType } from '@/pagination/paginated-type.interface';
+import { IPaginatedType, Paginated } from '@/pagination/paginated.decorator';
 import { Role } from '../roles/schemas/role.schema';
 import { RolesService } from '../roles/roles.service';
+import { Filter } from '@/pagination/filter.input';
+
+const PaginatedUsers = Paginated(User);
 
 @Resolver(() => User)
 export class UsersResolver {
@@ -27,29 +24,12 @@ export class UsersResolver {
     return this.usersService.create(createUserInput);
   }
 
-  @Query(() => UserPagination, { name: 'users' })
-  async findAll(
-    @CurrentUser() user: User,
-    @Args('filter') filter: UserFilter,
-  ): Promise<UserPagination> {
-    //console.log(user);
-    return await this.usersService.findAll(filter);
-  }
-
-  @Query(() => UserConnection, { name: 'getUsersPagination' })
+  @Query(() => PaginatedUsers, { name: 'getUsersPagination' })
   async getUsersPagination(
-    @Args('offset', { type: () => Number, nullable: true }) offset?: number,
-    @Args('limit', { type: () => Number, nullable: true }) limit?: number,
-  ): Promise<UserConnection> {
-    return await this.usersService.getUsersPagination({ offset, limit });
+    @Args('filter') filter: Filter,
+  ): Promise<IPaginatedType<User>> {
+    return await this.usersService.getUsersPagination(filter);
   }
-
-  // @Query(() => Paginated(User), { name: 'getUsersPagination' })
-  // async getUsersPagination(
-  //   @Args('filter') filter: UserFilter
-  // ): Promise<IPaginatedType<User>> {
-  //   return this.usersService.getUsersPagination(filter);
-  // }
 
   @Query(() => User, { name: 'user' })
   async findOne(@Args('id', { type: () => Number }) id: number): Promise<User> {
@@ -86,13 +66,17 @@ export class UsersResolver {
   @Query(() => [ResultUnion])
   async search(@Args('text') text: string): Promise<Array<typeof ResultUnion>> {
     const roles: Role[] = await this.rolesService.findAll();
+    const users: User[] = await this.usersService.findAll();
 
+    const filteredUsers = users.filter((role) =>
+      role.username.toLowerCase().includes(text.toLowerCase()),
+    );
     // Filter Role based on the keyword 'text'
     const filteredRoles = roles.filter((role) =>
       role.roleName.toLowerCase().includes(text.toLowerCase()),
     );
 
     // Return a combined list of User and Role (here it's just Role)
-    return [...filteredRoles];
+    return [...filteredUsers, ...filteredRoles];
   }
 }

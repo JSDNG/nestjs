@@ -23,29 +23,9 @@ type User {
   role: Role!
 }
 
-type UserPagination {
-  data: [User!]!
-  total: Float!
-  limit: Float!
-  page: Float!
-}
-
 type UserEdge {
+  cursor: String!
   node: User!
-  cursor: Float!
-}
-
-type PageInfo {
-  hasNextPage: Boolean!
-  hasPreviousPage: Boolean!
-  startCursor: Float
-  endCursor: Float
-}
-
-type UserConnection {
-  edges: [UserEdge!]!
-  totalCount: Float!
-  pageInfo: PageInfo!
 }
 
 type LoginResult {
@@ -58,8 +38,7 @@ type LoginResult {
 scalar Date
 
 type Query {
-  users(filter: UserFilter!): UserPagination!
-  getUsersPagination(offset: Float, limit: Float): UserConnection!
+  getUsersPagination(filter: Filter!): PaginatedType!
   user(id: Float!): User!
   getCurrentDate: Date!
   search(text: String!): [ResultUnion!]!
@@ -67,10 +46,18 @@ type Query {
   role(id: Int!): Role!
 }
 
-input UserFilter {
-  search: String
+type PaginatedType {
+  edges: [UserEdge!]
+  totalCount: Int!
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+  endCursor: String
+}
+
+input Filter {
+  offset: Int
   limit: Int
-  page: Int
 }
 
 union ResultUnion = User | Role

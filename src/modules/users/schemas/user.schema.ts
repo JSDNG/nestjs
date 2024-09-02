@@ -43,58 +43,7 @@ export class User {
   role?: Role; // Định nghĩa mối quan hệ với Role
 }
 
-@ObjectType()
-export class UserPagination {
-  @Field(() => [User])
-  data: User[];
-
-  @Field()
-  total: number;
-
-  @Field()
-  limit: number;
-
-  @Field()
-  page: number;
-}
-
-@ObjectType()
-export class UserEdge {
-  @Field(() => User)
-  node: User;
-
-  @Field()
-  cursor: number;
-}
-
-@ObjectType()
-export class PageInfo {
-  @Field()
-  hasNextPage: boolean;
-
-  @Field()
-  hasPreviousPage: boolean;
-
-  @Field({ nullable: true })
-  startCursor?: number;
-
-  @Field({ nullable: true })
-  endCursor?: number;
-}
-
-@ObjectType()
-export class UserConnection {
-  @Field(() => [UserEdge])
-  edges: UserEdge[];
-
-  @Field()
-  totalCount: number;
-
-  @Field(() => PageInfo)
-  pageInfo: PageInfo;
-}
-
-const ResultUnion = createUnionType({
+export const ResultUnion = createUnionType({
   name: 'ResultUnion',
   types: () => [User, Role] as const,
   resolveType(value) {
@@ -108,4 +57,3 @@ const ResultUnion = createUnionType({
   },
 });
 
-export { ResultUnion };

@@ -1,11 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateUserInput, UserFilter } from './dto/inputs/create-user.input';
+import { CreateUserInput} from './dto/inputs/create-user.input';
 import { UpdateUserInput } from './dto/inputs/update-user.input';
 import { v4 as uuid } from 'uuid';
 import { PrismaService } from '@/prisma.service';
 import { User } from '@prisma/client';
-import { UserConnection, UserPagination } from './schemas/user.schema';
-import { IPaginatedType } from '@/pagination/paginated-type.interface';
+import { IPaginatedType } from '@/pagination/paginated.decorator';
+import { Filter } from '@/pagination/filter.input';
 
 @Injectable()
 export class UsersService {
@@ -23,62 +23,29 @@ export class UsersService {
     }
     return await this.prismaService.user.create({ data: createUserInput });
   }
-
-  async findAll(filter: UserFilter): Promise<UserPagination> {
-    const search = filter.search || '';
-    const limit = Number(filter.limit) || 10;
-    const page = Number(filter.page) || 1;
-
-    const skip = page > 1 ? (page - 1) * limit : 0;
-    const users = await this.prismaService.user.findMany({
-      take: limit,
-      skip,
-      where: {
-        OR: [
-          {
-            username: {
-              contains: search,
-            },
-          },
-          {
-            email: {
-              contains: search,
-            },
-          },
-        ],
-      },
-      include: { role: true },
-    });
-    const total = users.length;
-    return {
-      data: users,
-      total,
-      limit,
-      page,
-    };
+  async findAll() {
+    return await this.prismaService.user.findMany();
   }
 
-  async getUsersPagination({ offset, limit }: { offset?: number; limit?: number }): Promise<UserConnection> {
+  async getUsersPagination(filter: Filter): Promise<IPaginatedType<User>> {
     const users = await this.prismaService.user.findMany({
-      take: limit,
-      skip: offset,
+      take: filter.limit,
+      skip: filter.offset,
       include: { role: true },
     });
     const totalCount = await this.prismaService.user.count();
     const edges = users.map((user) => ({
-      cursor: user.id,
+      cursor: user.id.toString(),
       node: user,
     }));
 
     return {
       edges,
       totalCount: users.length,
-      pageInfo: {
-        hasNextPage: offset + limit < totalCount,
-        hasPreviousPage: offset > 0,
-        startCursor: edges.length > 0 ? edges[0].cursor : null,
-        endCursor: edges.length > 0 ? edges[edges.length - 1].cursor : null,
-      },
+      hasNextPage: filter.offset + filter.limit < totalCount,
+      hasPreviousPage: filter.offset > 0,
+      startCursor: edges.length > 0 ? edges[0].cursor : null,
+      endCursor: edges.length > 0 ? edges[edges.length - 1].cursor : null,
     };
   }
   async findOne(id: number): Promise<User> {

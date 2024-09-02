@@ -15,7 +15,6 @@ import { AuthGuard } from '@/auth/auth.guard';
 import { JwtService } from '@nestjs/jwt';
 import { GraphqlOptions, MailerConfigService } from './graphql.options';
 import { DateScalar } from '@/commons/scalars/date.scalar';
-import { PubSub } from 'graphql-subscriptions';
 import { PubSubModule } from './subscriptions/pubsub.module';
 
 @Module({

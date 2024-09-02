@@ -10,7 +10,6 @@ import { ConfigService } from '@nestjs/config';
 export class GraphqlOptions implements GqlOptionsFactory<ApolloDriverConfig> {
   createGqlOptions(): ApolloDriverConfig {
     return {
-      driver: ApolloDriver,
       playground: true,
       autoSchemaFile: 'src/schema.gql',
       subscriptions: {

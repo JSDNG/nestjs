@@ -50,14 +50,4 @@ export class CreateUserInput {
   roleId: number;
 }
 
-@InputType()
-export class UserFilter {
-  @Field(() => String, { nullable: true })
-  search?: string;
 
-  @Field(() => Int, { nullable: true })
-  limit?: number;
-
-  @Field(() => Int, { nullable: true })
-  page?: number;
-}
