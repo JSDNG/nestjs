@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateUserInput} from './dto/inputs/create-user.input';
+import { CreateUserInput } from './dto/inputs/create-user.input';
 import { UpdateUserInput } from './dto/inputs/update-user.input';
 import { v4 as uuid } from 'uuid';
 import { PrismaService } from '@/prisma.service';

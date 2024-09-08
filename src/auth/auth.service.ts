@@ -1,8 +1,6 @@
 import {
   BadRequestException,
   ConflictException,
-  HttpException,
-  HttpStatus,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -16,6 +14,7 @@ import dayjs from 'dayjs';
 import { Queue } from 'bullmq';
 import { InjectQueue } from '@nestjs/bullmq';
 import { AuthGuard } from './auth.guard';
+import { CustomNotFoundException } from '@/errors/error-codes.enum';
 
 @Injectable()
 export class AuthService {
@@ -50,16 +49,16 @@ export class AuthService {
       },
     });
 
-    // Add job to queue
-    // await this.mailQueue.add(
-    //   'sendEmail',
-    //   {
-    //     name: user?.username,
-    //     email: user?.email,
-    //     activationCode: codeId,
-    //   },
-    //   { delay: 1 * 60 * 1000 }, // 1 minutes delayed
-    // );
+    //Add job to queue
+    await this.mailQueue.add(
+      'sendEmail',
+      {
+        name: user?.username,
+        email: user?.email,
+        activationCode: codeId,
+      },
+      { delay: 1 * 60 * 1000 }, // 1 minutes delayed
+    );
 
     return user;
   }
@@ -74,6 +73,7 @@ export class AuthService {
 
     if (!user) {
       throw new NotFoundException('Account not found!');
+      //throw new CustomNotFoundException();
     }
 
     const verify = await comparePasswordHelpers(
@@ -88,6 +88,7 @@ export class AuthService {
     // if (user.isActive === false) {
     //   throw new BadRequestException('Tài khoản chưa được kích hoạt.');
     // }
+
     const payload = {
       id: user.id,
       name: user.username,

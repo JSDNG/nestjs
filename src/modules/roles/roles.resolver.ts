@@ -4,8 +4,9 @@ import { Role } from './schemas/role.schema';
 import { CreateRoleInput } from './dto/create-role.input';
 import { UpdateRoleInput } from './dto/update-role.input';
 import { SkipAuthGuard } from '@/auth/skip-auth-guard.decorator';
-import { Inject } from '@nestjs/common';
+import { Inject, UseInterceptors } from '@nestjs/common';
 import { PubSub } from 'graphql-subscriptions';
+import { CacheInterceptor } from '@nestjs/cache-manager';
 
 @Resolver(() => Role)
 export class RolesResolver {
@@ -20,6 +21,7 @@ export class RolesResolver {
   }
 
   @Query(() => [Role], { name: 'roles' })
+  //@UseInterceptors(CacheInterceptor)
   findAll() {
     return this.rolesService.findAll();
   }

@@ -16,7 +16,7 @@ export class GraphqlOptions implements GqlOptionsFactory<ApolloDriverConfig> {
         'subscriptions-transport-ws': {
           path: '/graphql',
         },
-      },
+      }, 
       formatError: (error: GraphQLError) => {
         const originalError = error.extensions?.originalError;
 

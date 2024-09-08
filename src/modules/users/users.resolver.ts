@@ -9,6 +9,7 @@ import { IPaginatedType, Paginated } from '@/pagination/paginated.decorator';
 import { Role } from '../roles/schemas/role.schema';
 import { RolesService } from '../roles/roles.service';
 import { Filter } from '@/pagination/filter.input';
+import { MyLogger } from '@/logger/my-logger.service';
 
 const PaginatedUsers = Paginated(User);
 
@@ -17,6 +18,7 @@ export class UsersResolver {
   constructor(
     private readonly usersService: UsersService,
     private readonly rolesService: RolesService,
+    private readonly logger: MyLogger,
   ) {}
 
   @Mutation(() => User, { name: 'createUser' })
@@ -78,5 +80,13 @@ export class UsersResolver {
 
     // Return a combined list of User and Role (here it's just Role)
     return [...filteredUsers, ...filteredRoles];
+  }
+
+  //test logger
+  @Query(() => String)
+  getSomething() {
+    this.logger.log('Accessed /some endpoint');
+    // Do something
+    return 'response';
   }
 }

@@ -1,9 +1,6 @@
-import { AuthService } from '@/auth/auth.service';
-import { PrismaService } from '@/prisma.service';
 import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [
