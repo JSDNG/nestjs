@@ -1,12 +1,16 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateRoleInput } from './dto/create-role.input';
 import { UpdateRoleInput } from './dto/update-role.input';
 import { PrismaService } from '@/prisma.service';
 import { Role } from '@prisma/client';
+import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
 
 @Injectable()
 export class RolesService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(
+    private prismaService: PrismaService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+  ) {}
 
   async create(createRoleInput: CreateRoleInput): Promise<Role> {
     return await this.prismaService.role.create({ data: createRoleInput });
@@ -36,6 +40,23 @@ export class RolesService {
     } catch (error) {
       console.log(error);
       return 'Error form server';
+    }
+  }
+
+  async getCachedData(): Promise<string> {
+    const key = 'rolesList';
+    try {
+      const cachedData = await this.cacheManager.get<string>(key);
+      if (cachedData) {
+        console.log(cachedData);
+      } else {
+        throw new Error(`No data found for key: ${key}`);
+      }
+
+      return 'cachedData';
+    } catch (error) {
+      console.error('Error retrieving cached data:', error);
+      throw new Error('Error retrieving cached data');
     }
   }
 }
