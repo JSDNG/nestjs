@@ -23,6 +23,9 @@ export class CreateUserInput {
   @MinLength(6)
   password: string;
 
+  @Field(() => String)
+  imgName?: string;
+
   @Field(() => String, { nullable: true })
   @IsOptional()
   @Matches(
@@ -49,5 +52,3 @@ export class CreateUserInput {
   @Field()
   roleId: number;
 }
-
-

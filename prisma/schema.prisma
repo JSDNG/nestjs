@@ -12,6 +12,7 @@ model User {
   email         String   @unique
   username      String?
   password      String
+  imgName       String?
   phone         String?
   isActive      Boolean
   codeId        String
@@ -32,6 +33,5 @@ model Role {
   updatedAt              DateTime            @updatedAt
   @@map("roles")
 }
-
 
 //npx prisma db push

@@ -12,6 +12,7 @@ type User {
   username: String!
   email: String!
   password: String!
+  imgName: String!
   phone: String
   isActive: Boolean!
   codeId: String!
@@ -36,6 +37,9 @@ type LoginResult {
 
 """Date custom scalar type"""
 scalar Date
+
+"""Upload custom scalar type"""
+scalar Uploads
 
 type Query {
   getUsersPagination(filter: Filter!): PaginatedType!
@@ -85,6 +89,7 @@ input CreateUserInput {
   username: String
   email: String
   password: String!
+  imgName: String!
   phone: String
   isActive: Boolean!
   codeId: String!
@@ -97,6 +102,7 @@ input UpdateUserInput {
   username: String!
   email: String
   password: String
+  imgName: String
   phone: String
   isActive: Boolean
   codeId: String

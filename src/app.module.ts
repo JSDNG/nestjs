@@ -28,6 +28,7 @@ import graphqlUploadExpress from 'graphql-upload/graphqlUploadExpress.js';
 import { join } from 'path';
 import { FilesUploadResolver } from '@/files-upload/files-upload.resolver';
 import { UploadScalar } from '@/commons/scalars/upload.scalar';
+import { FilesModule } from './files/files.module';
 
 @Module({
   imports: [
@@ -37,15 +38,9 @@ import { UploadScalar } from '@/commons/scalars/upload.scalar';
     PubSubModule,
     LoggerModule,
     ConfigModule.forRoot({ isGlobal: true }),
-    // GraphQLModule.forRootAsync<ApolloDriverConfig>({
-    //   driver: ApolloDriver,
-    //   useClass: GraphqlOptions,
-    // }),
-
-    GraphQLModule.forRoot({
+    GraphQLModule.forRootAsync<ApolloDriverConfig>({
       driver: ApolloDriver,
-      autoSchemaFile: true,
-      uploads: false, // Disable built-in upload support
+      useClass: GraphqlOptions,
     }),
 
     MailerModule.forRootAsync({
@@ -67,8 +62,9 @@ import { UploadScalar } from '@/commons/scalars/upload.scalar';
     CacheModule.register({
       isGlobal: true,
       ttl: 5,
-      max: 10, 
+      max: 10,
     }),
+    FilesModule,
   ],
   controllers: [AppController],
   providers: [

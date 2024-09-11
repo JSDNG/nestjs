@@ -15,6 +15,9 @@ export class User {
   @Field()
   password: string;
 
+  @Field()
+  imgName: string;
+
   @Field({ nullable: true })
   phone?: string;
 

@@ -10,7 +10,7 @@ async function bootstrap() {
     bufferLogs: true,
   });
   //app.useLogger(app.get(MyLogger));
-  app.use(graphqlUploadExpress({ maxFileSize: 10000000, maxFiles: 10 }));
+  //app.use(graphqlUploadExpress({ maxFileSize: 10000000, maxFiles: 10 }));
 
   const configService = app.get(ConfigService);
   const port = configService.get('PORT');
