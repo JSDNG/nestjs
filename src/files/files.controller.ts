@@ -34,28 +34,26 @@ export class FilesController {
     };
   }
 
-  @Post()
-  create(@Body() createFileDto: CreateFileDto) {
-    return this.filesService.create(createFileDto);
+  @Get('list')
+  async listFiles() {
+    return this.filesService.listFiles();
   }
 
-  @Get()
-  findAll() {
-    return this.filesService.findAll();
+  @Delete(':fileName')
+  async deleteFile(@Param('fileName') fileName: string) {
+    await this.filesService.deleteFile(fileName);
+    return { message: 'File deleted successfully' };
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.filesService.findOne(+id);
+  @Post('generate-upload-url')
+  async getUploadUrl(@Body('contentType') contentType: string, @Body('id') id: number) {
+    const uploadUrl = await this.filesService.generateUploadUrl(id, contentType);
+    return { uploadUrl };
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateFileDto: UpdateFileDto) {
-    return this.filesService.update(+id, updateFileDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.filesService.remove(+id);
+  @Post('copy')
+  async copyFile(@Body('source') source: string, @Body('destinationKey') destinationKey: string) {
+    await this.filesService.copyFile(source, destinationKey);
+    return { message: 'File copied successfully' };
   }
 }

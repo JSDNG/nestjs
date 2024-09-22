@@ -79,10 +79,10 @@ import { FilesModule } from './files/files.module';
       provide: APP_PIPE,
       useClass: ValidationPipe,
     },
-    {
-      provide: APP_GUARD,
-      useClass: AuthGuard,
-    },
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: AuthGuard,
+    // },
   ],
 })
 export class AppModule implements NestModule {
