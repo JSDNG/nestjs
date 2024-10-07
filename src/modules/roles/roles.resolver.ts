@@ -20,6 +20,7 @@ import {
   CacheTTL,
 } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
+import { RabbitmqService } from '@/rabbitmq/rabbitmq.service';
 
 @Resolver(() => Role)
 export class RolesResolver {
@@ -27,6 +28,7 @@ export class RolesResolver {
     private readonly rolesService: RolesService,
     @Inject('PUB_SUB') private pubSub: PubSub,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private readonly rabbitMQService: RabbitmqService, // Inject RabbitMQ service
   ) {}
 
   @Mutation(() => Role, { name: 'createRole' })
@@ -94,5 +96,45 @@ export class RolesResolver {
       console.error('Error fetching from cache:', error);
       return 'Error fetching data';
     }
+  }
+
+  // RabbitMQ
+  @Mutation(() => Role)
+  async createTask(@Args('createRoleInput') createRoleInput: CreateRoleInput) {
+    const { role } = await this.rolesService.createTask(createRoleInput);
+    return role;
+  }
+
+  @Mutation(() => Role)
+  async processTask(@Args('id', { type: () => Number }) id: number): Promise<Role> {
+    return this.rolesService.processTask(id);
+  }
+
+  // Mutation to publish a message to RabbitMQ
+  @Mutation(() => String, { name: 'publishLog' })
+  async publishLog(
+    @Args('level') level: string,
+    @Args('message') message: string,
+  ): Promise<string> {
+    await this.rabbitMQService.publishMessage(level, message);
+    return `Message sent to ${level} logs: ${message}`;
+  }
+
+  // Mutation to consume info logs
+  @Mutation(() => String, { name: 'consumeInfoLogs' })
+  async consumeInfoLogs(): Promise<string> {
+    await this.rabbitMQService.consumeInfoLogs((message) => {
+      console.log('Received info log:', message);
+    });
+    return 'Started consuming info logs';
+  }
+
+  // Mutation to consume error logs
+  @Mutation(() => String, { name: 'consumeErrorLogs' })
+  async consumeErrorLogs(): Promise<string> {
+    await this.rabbitMQService.consumeErrorLogs((message) => {
+      console.log('Received error log:', message);
+    });
+    return 'Started consuming error logs';
   }
 }

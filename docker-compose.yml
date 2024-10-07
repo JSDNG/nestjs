@@ -21,6 +21,20 @@ services:
     networks:
       - mynetwork
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - '5672:5672'  # AMQP protocol port
+      - '15672:15672'  # Management UI port
+    environment:
+      - RABBITMQ_DEFAULT_USER=user
+      - RABBITMQ_DEFAULT_PASS=password
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - mynetwork
+
   # nestjs-app:
   #   build: .
   #   container_name: nestjs-app
@@ -34,14 +48,20 @@ services:
   #     MYSQL_USER: root
   #     MYSQL_PASSWORD: 123456
   #     MYSQL_DB: mysql
+  #     RABBITMQ_HOST: rabbitmq
+  #     RABBITMQ_PORT: 5672
+  #     RABBITMQ_USER: user
+  #     RABBITMQ_PASSWORD: password
   #   depends_on:
   #     - redis
   #     - mysql
+  #     - rabbitmq
   #   networks:
   #     - mynetwork
 
 volumes:
   db:
+  rabbitmq_data:
 
 networks:
   mynetwork:

@@ -59,21 +59,21 @@ export class FilesService {
   // Generate upload url from frontend to s3
   async generateUploadUrl(id: number, contentType: string): Promise<string> {
     try {
-      console.log('contentType', contentType);
-      const fileName = uuid();
+      const fileExtension = contentType.split('/')[1] || 'jpg';
+      const fileName = `${uuid()}.${fileExtension}`;
       const params = {
         Bucket: this.bucketName,
         Key: fileName,
-        ContentType: contentType,
+        // ContentType: contentType, // This may not be necessary anymore
         ACL: 'public-read' as ObjectCannedACL,
       };
 
       const user = await this.prismaService.user.findUnique({
-        where: { id: id },
+        where: { id: +id },
       });
-
-      this.deleteFile(user.imgName);
-
+      if (user.imgName) {
+        this.deleteFile(user.imgName);
+      }
       await this.prismaService.user.update({
         where: { id: +id },
         data: { imgName: fileName },
@@ -177,14 +177,52 @@ export class FilesService {
         Bucket: this.bucketName,
         CopySource: `${this.bucketName}/${destinationKey}`,
         Key: `${source}/${destinationKey.split('/').pop()}`,
-        ACL: 'public-read' as ObjectCannedACL,
+        //ACL: 'public-read' as ObjectCannedACL,
       };
       const copyCommand = new CopyObjectCommand(copyParams);
       await this.s3Client.send(copyCommand);
-      console.log(`File ${destinationKey} copied to ${source} folder successfully.`);
     } catch (error) {
       console.error('Error copying file:', error);
       throw new Error(`Error copying file in S3: ${error.message}`);
     }
+  }
+
+  // Generate signed URL
+  async generateSignedUrl(userId: number, fileName: string): Promise<string> {
+    try {
+      // Kiểm tra quyền truy cập của người dùng
+      // const hasPermission = await this.checkUserPermission(userId, fileName);
+      // if (!hasPermission) {
+      //   throw new Error('User does not have permission to access this file');
+      // }
+      const params = {
+        Bucket: this.bucketName,
+        Key: fileName,
+      };
+      const command = new GetObjectCommand(params);
+      const signedUrl = await getSignedUrl(this.s3Client, command, {
+        expiresIn: 3600, // URL có hiệu lực trong 1 giờ
+      });
+      return signedUrl;
+    } catch (error) {
+      console.error(`Error generating signed URL: ${error.message}`);
+      throw new Error(`Error generating signed URL: ${error.message}`);
+    }
+  }
+
+  // Hàm kiểm tra quyền truy cập của người dùng
+  private async checkUserPermission(userId: number, fileName: string): Promise<boolean> {
+    // Logic kiểm tra quyền truy cập
+    // Ví dụ: kiểm tra xem người dùng có phải là chủ sở hữu của file hay không
+    const user = await this.prismaService.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (user && user.imgName === fileName) {
+      return true;
+    }
+
+    // Thêm các logic kiểm tra quyền khác nếu cần
+    return false;
   }
 }

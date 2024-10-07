@@ -29,6 +29,7 @@ import { join } from 'path';
 import { FilesUploadResolver } from '@/files-upload/files-upload.resolver';
 import { UploadScalar } from '@/commons/scalars/upload.scalar';
 import { FilesModule } from './files/files.module';
+import { RabbitmqModule } from './rabbitmq/rabbitmq.module';
 
 @Module({
   imports: [
@@ -65,6 +66,7 @@ import { FilesModule } from './files/files.module';
       max: 10,
     }),
     FilesModule,
+    RabbitmqModule,
   ],
   controllers: [AppController],
   providers: [
