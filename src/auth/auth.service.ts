@@ -5,9 +5,9 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { LoginAuthInput, RegisterAuthInput } from './dto/auth.input';
-import { PrismaService } from '@/prisma.service';
+import { PrismaService } from '../prisma.service';
 import { User } from '@prisma/client';
-import { comparePasswordHelpers, hashPasswordHelpers } from '@/helpers/util';
+import { comparePasswordHelpers, hashPasswordHelpers } from '../helpers/util';
 import { LoginResult } from './schemas/auth.schema';
 import { v4 as uuidv4 } from 'uuid';
 import dayjs from 'dayjs';
@@ -15,12 +15,14 @@ import { Queue } from 'bullmq';
 import { InjectQueue } from '@nestjs/bullmq';
 import { AuthGuard } from './auth.guard';
 import { CustomNotFoundException } from '@/errors/error-codes.enum';
+import { MyLogger } from '../logger/my-logger.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private prismaService: PrismaService,
     private authGuard: AuthGuard,
+    private readonly logger: MyLogger,
     @InjectQueue('mailQueue') private readonly mailQueue: Queue,
   ) {}
 
@@ -28,6 +30,11 @@ export class AuthService {
     const user = await this.prismaService.user.findUnique({ where: { email } });
     if (user) return true;
     return false;
+  };
+
+  isValidEmail = async (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
   };
 
   async register(userData: RegisterAuthInput): Promise<User> {
@@ -64,6 +71,12 @@ export class AuthService {
   }
 
   async login(userData: LoginAuthInput): Promise<LoginResult> {
+    this.logger.log('AuthService: login called with input:', userData);
+    if (!this.isValidEmail(userData.email)) {
+      console.log('>>>>>>>>>>>>');
+      throw new Error('Invalid email format');
+    }
+
     const user = await this.prismaService.user.findUnique({
       where: {
         email: userData.email,

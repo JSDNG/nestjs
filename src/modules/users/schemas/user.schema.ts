@@ -1,4 +1,4 @@
-import { Role } from '@/modules/roles/schemas/role.schema';
+import { Role } from '../../../modules/roles/schemas/role.schema';
 import { createUnionType, Field, Int, ObjectType } from '@nestjs/graphql';
 
 @ObjectType()

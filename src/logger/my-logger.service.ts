@@ -1,6 +1,6 @@
 import * as winston from 'winston';
 import { Injectable, LoggerService } from '@nestjs/common';
-import { LogLevel, LogLevelColors } from '@/enums/enum';
+import { LogLevel, LogLevelColors } from '../enums/enum';
 
 @Injectable()
 export class MyLogger implements LoggerService {
@@ -15,11 +15,14 @@ export class MyLogger implements LoggerService {
     },
     format: winston.format.combine(
       winston.format.colorize({ all: true, colors: LogLevelColors }),
-      winston.format.simple()
+      winston.format.timestamp(), // Thêm timestamp vào log
+      winston.format.printf(({ timestamp, level, message }) => {
+        return `${timestamp} [${level}]: ${message}`; // Định dạng log
+      })
     ),
     transports: [
-      new winston.transports.Console(),
-      new winston.transports.File({ filename: 'combined.log' }),
+      new winston.transports.Console(), // Ghi log ra console
+      new winston.transports.File({ filename: 'combined.log' }), // Ghi log vào file
     ],
   });
 

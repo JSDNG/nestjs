@@ -30,6 +30,9 @@ import { FilesUploadResolver } from '@/files-upload/files-upload.resolver';
 import { UploadScalar } from '@/commons/scalars/upload.scalar';
 import { FilesModule } from './files/files.module';
 import { RabbitmqModule } from './rabbitmq/rabbitmq.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { UserModule } from './rest-api/user/user.module';
+import { RoleModule } from './rest-api/role/role.module';
 
 @Module({
   imports: [
@@ -65,8 +68,26 @@ import { RabbitmqModule } from './rabbitmq/rabbitmq.module';
       ttl: 5,
       max: 10,
     }),
+
+    // TypeOrmModule.forRootAsync({
+    //   useFactory: async (configService: ConfigService) => ({
+    //     type: 'mysql',
+    //     host: configService.get('HOST_DB'),
+    //     port: +configService.get('PORT_DB'),
+    //     username: configService.get('USERNAME_DB'),
+    //     password: configService.get('PASSWORD_DB'),
+    //     database: configService.get('DB_NAME'),
+    //     entities: [__dirname + '/**/*.entity{.ts,.js}'],
+    //     synchronize: true,
+    //     logging: true,
+    //     logger: 'advanced-console',
+    //   }),
+    //   inject: [ConfigService],
+    // }),
     FilesModule,
     RabbitmqModule,
+    UserModule,
+    RoleModule,
   ],
   controllers: [AppController],
   providers: [

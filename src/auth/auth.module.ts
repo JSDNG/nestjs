@@ -7,9 +7,10 @@ import { MailModule } from '@/mailer/mail.module';
 import { AuthGuard } from './auth.guard';
 import { UsersModule } from '@/modules/users/users.module';
 import { FilesModule } from '@/files/files.module';
+import { LoggerModule } from '@/logger/logger.module';
 
 @Module({
-  imports: [MailModule, UsersModule, FilesModule],
+  imports: [MailModule, UsersModule, FilesModule, LoggerModule],
   providers: [AuthResolver, AuthService, PrismaService, JwtService, AuthGuard],
 })
 export class AuthModule {}

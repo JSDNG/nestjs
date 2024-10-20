@@ -2,10 +2,10 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserInput } from './dto/inputs/create-user.input';
 import { UpdateUserInput } from './dto/inputs/update-user.input';
 import { v4 as uuid } from 'uuid';
-import { PrismaService } from '@/prisma.service';
+import { PrismaService } from '../../prisma.service';
 import { User } from '@prisma/client';
-import { IPaginatedType } from '@/pagination/paginated.decorator';
-import { Filter } from '@/pagination/filter.input';
+import { IPaginatedType } from '../../pagination/paginated.decorator';
+import { Filter } from '../../pagination/filter.input';
 
 @Injectable()
 export class UsersService {

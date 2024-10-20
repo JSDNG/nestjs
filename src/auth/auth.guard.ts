@@ -1,4 +1,4 @@
-import { UsersService } from '@/modules/users/users.service';
+import { UsersService } from '../modules/users/users.service';
 import {
   CanActivate,
   ExecutionContext,
